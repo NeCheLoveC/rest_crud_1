@@ -1,9 +1,9 @@
 package com.example.springsecr.controllers;
 
-import com.example.springsecr.dto.model.UserRegisterCredentionalsDto;
+import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.UserUpdateDTO;
 import com.example.springsecr.models.RoleType;
 import com.example.springsecr.services.UserService;
-import com.example.springsecr.validators.UserRegistrationDtoValidator;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,15 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController
 {
@@ -27,7 +24,7 @@ public class UserController
 
     @PostMapping
     public ResponseEntity<?> register(
-            @RequestBody @Valid UserRegisterCredentionalsDto credentionals,
+            @RequestBody @Valid UserRegisterCredentionalsRequestDto credentionals,
             BindingResult result,
             Authentication authentication)
     {
@@ -49,5 +46,25 @@ public class UserController
         }
         userService.saveUser(credentionals);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(
+            @Valid @RequestBody UserUpdateDTO userUpdateDTO,
+            BindingResult bindingResult,
+            @PathVariable("id") long id
+    )
+    {
+        userUpdateDTO.setId(id);
+        if(bindingResult.hasErrors())
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors().stream().map(er -> er.getDefaultMessage()).collect(Collectors.joining()));
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{idUser}/departments/{idDepartment}")
+    public ResponseEntity<?> setUserDepartment(@PathVariable("idUser") Long idUser, @PathVariable("idDepartment") Long idDepartment)
+    {
+        userService.setDepartment(idUser, idDepartment);
+        return ResponseEntity.ok().build();
     }
 }

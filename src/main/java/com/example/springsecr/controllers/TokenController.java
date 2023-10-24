@@ -1,23 +1,17 @@
 package com.example.springsecr.controllers;
 
-import com.example.springsecr.dto.model.UsernamePasswordDTO;
-import com.example.springsecr.models.User;
+import com.example.springsecr.dto.model.UsernamePasswordRequestDTO;
 import com.example.springsecr.security.JwtUtils;
 import com.example.springsecr.services.UserService;
 import com.example.springsecr.utils.BCryptEncoderWrapper;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/jwt")
@@ -29,7 +23,7 @@ public class TokenController
     private BCryptEncoderWrapper bCryptEncoderWrapper;
 
     @PostMapping
-    public ResponseEntity<?> getJWT(@Valid @RequestBody UsernamePasswordDTO usernamePasswordDTO, BindingResult bindingResult)
+    public ResponseEntity<?> getJWT(@Valid @RequestBody UsernamePasswordRequestDTO usernamePasswordDTO, BindingResult bindingResult)
     {
         if(bindingResult.hasErrors())
         {
@@ -48,7 +42,7 @@ public class TokenController
         }
     }
 
-    private boolean authorizationIsSuccess(UserDetails user, UsernamePasswordDTO credentials)
+    private boolean authorizationIsSuccess(UserDetails user, UsernamePasswordRequestDTO credentials)
     {
         BCryptPasswordEncoder passwordEncoder = bCryptEncoderWrapper.getbCryptEncoderWrapper();
         return user.getUsername().equals(credentials.getUsername()) && passwordEncoder.matches(credentials.getPassword(),user.getPassword());

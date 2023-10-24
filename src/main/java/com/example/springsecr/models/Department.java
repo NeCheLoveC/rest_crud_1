@@ -1,21 +1,21 @@
 package com.example.springsecr.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Collection;
 import java.util.Collections;
 
 @Entity
 @Table(name = "department")
-@Data
+@Setter
+@Getter
 public class Department
 {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "department_generator_id_seq")
     @SequenceGenerator(name = "department_generator_id_seq", sequenceName = "department_generator_id_seq")
+    @Setter(AccessLevel.PRIVATE)
     private Long id;
     private String name;
     @OneToOne
@@ -32,7 +32,7 @@ public class Department
             inverseJoinColumns = {@JoinColumn(name = "boss_id", unique = true,nullable = false)}
     )
     private User boss;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_parent_id")
     private Department departmentParent;
 

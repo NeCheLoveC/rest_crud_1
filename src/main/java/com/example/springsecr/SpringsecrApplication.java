@@ -1,21 +1,14 @@
 package com.example.springsecr;
 
-import com.example.springsecr.dto.ConverterDTO;
-import com.example.springsecr.dto.model.UserRegisterCredentionalsDto;
-import com.example.springsecr.models.User;
+import com.example.springsecr.dto.converter.UserRegisterRequestConverter;
+import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
 import com.example.springsecr.services.RoleService;
 import com.example.springsecr.services.UserService;
-import com.example.springsecr.utils.BCryptEncoderWrapper;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.util.Collections;
 
 @SpringBootApplication
 @AllArgsConstructor
@@ -24,7 +17,7 @@ public class SpringsecrApplication {
 
     protected RoleService roleService;
     protected UserService userService;
-    protected ConverterDTO<UserRegisterCredentionalsDto, User> converterUserRegisterDto;
+    protected UserRegisterRequestConverter converterUserRegisterDto;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringsecrApplication.class, args);
@@ -45,9 +38,12 @@ public class SpringsecrApplication {
 
     private void createFirstUserAdmin()
     {
-        User user = new User("admin","admin","adminprot@mail.ru", Collections.singleton(roleService.getADMIN_ROLE()));
-        UserRegisterCredentionalsDto adminDTO = converterUserRegisterDto.convertToDTO(user);
-        userService.saveUser(adminDTO);
+        UserRegisterCredentionalsRequestDto dto = new UserRegisterCredentionalsRequestDto();
+        dto.setUsername("admin");
+        dto.setPassword("admin");
+        dto.setEmail("adminprot@mail.ru");
+        dto.setRole("ROLE_ADMIN");
+        userService.saveUser(dto);
     }
 
 }

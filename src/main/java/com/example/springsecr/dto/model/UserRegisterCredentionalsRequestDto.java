@@ -1,14 +1,8 @@
 package com.example.springsecr.dto.model;
 
-import com.example.springsecr.models.RoleType;
-import com.example.springsecr.models.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
-import lombok.Data;
 
-import java.util.Collections;
-
-public class UserRegisterCredentionalsDto
+public class UserRegisterCredentionalsRequestDto
 {
     @NotNull(message = "username is NOT NULL")
     @Size(min = 5, message = "username должен быть минимум 5 символов")

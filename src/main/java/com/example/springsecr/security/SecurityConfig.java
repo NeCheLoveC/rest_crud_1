@@ -2,7 +2,6 @@ package com.example.springsecr.security;
 
 import com.example.springsecr.services.UserService;
 import com.example.springsecr.utils.BCryptEncoderWrapper;
-import com.example.springsecr.validators.RoleValidators;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,7 @@ public class SecurityConfig
         return http.build();
     }
 
-    @Bean
+
     public DaoAuthenticationProvider daoAuthenticationProvider()
     {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();

@@ -1,11 +1,11 @@
 package com.example.springsecr.validators;
 
-import com.example.springsecr.dto.model.UserRegisterCredentionalsDto;
-import com.example.springsecr.exceptions.UsernameAlreadyExist;
+import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
 import com.example.springsecr.services.UserService;
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -20,13 +20,14 @@ public class UserRegistrationDtoValidator implements Validator
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.equals(UserRegisterCredentionalsDto.class);
+        return clazz.equals(UserRegisterCredentionalsRequestDto.class);
     }
 
+    @Transactional(propagation = Propagation.MANDATORY)
     @Override
     public void validate(Object target, Errors errors)
     {
-        UserRegisterCredentionalsDto userCredentionalsDto = (UserRegisterCredentionalsDto) target;
+        UserRegisterCredentionalsRequestDto userCredentionalsDto = (UserRegisterCredentionalsRequestDto) target;
         validateUsername(userCredentionalsDto.getUsername(), errors);
         validateEmail(userCredentionalsDto.getEmail(), errors);
     }

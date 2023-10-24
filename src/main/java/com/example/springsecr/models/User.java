@@ -13,9 +13,10 @@ import java.util.*;
 
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_username_unq", columnList = "username", unique = true)
+        @Index(name = "idx_user_username_unq", columnList = "username", unique = true),
+        @Index(name = "idx_user_email_unq", columnList = "email", unique = true)
 })
-public class User {
+public class User implements Cloneable{
     private static final String generatorName = "users_sequence_gen";
 
     @Id
@@ -34,7 +35,7 @@ public class User {
 
     @Email
     @NotNull
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @NotEmpty
@@ -45,6 +46,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false)
     )
     private Collection<Role> roles = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     protected User(){}
 
@@ -101,6 +105,14 @@ public class User {
         this.email = email;
     }
 
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -111,6 +123,6 @@ public class User {
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return username.hashCode();
     }
 }

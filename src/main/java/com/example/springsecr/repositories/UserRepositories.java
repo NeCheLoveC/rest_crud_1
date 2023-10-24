@@ -1,7 +1,11 @@
 package com.example.springsecr.repositories;
 
 import com.example.springsecr.models.User;
+import jakarta.persistence.LockModeType;
+import org.hibernate.annotations.NamedQuery;
+import org.hibernate.annotations.OptimisticLock;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
