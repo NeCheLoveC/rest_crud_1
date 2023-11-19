@@ -2,12 +2,16 @@ package com.example.springsecr.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 @Entity
-@Table(name = "department")
+@Table(name = "department", indexes = {@Index(name = "idx_department_department_parent_id", columnList = "department_parent_id")})
 @Setter
 @Getter
 public class Department
@@ -24,6 +28,7 @@ public class Department
             joinColumns = {@JoinColumn(name = "department_id", unique = true, nullable = false),},
             inverseJoinColumns = {@JoinColumn(name = "user_id", unique = true, nullable = false)}
     )
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User moderator;
     @OneToOne
     @JoinTable(
@@ -31,6 +36,7 @@ public class Department
             joinColumns = {@JoinColumn(name = "department_id", unique = true,nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "boss_id", unique = true,nullable = false)}
     )
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User boss;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_parent_id")
@@ -38,4 +44,20 @@ public class Department
 
     @OneToMany(mappedBy = "departmentParent")
     private Collection<Department> departments;
+
+    public Department() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Department that = (Department) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

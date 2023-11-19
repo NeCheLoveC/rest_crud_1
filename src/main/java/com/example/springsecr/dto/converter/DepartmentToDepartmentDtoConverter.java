@@ -1,6 +1,6 @@
 package com.example.springsecr.dto.converter;
 
-import com.example.springsecr.dto.model.DepartmentResponseDto;
+import com.example.springsecr.dto.model.response.DepartmentResponseDto;
 import com.example.springsecr.models.Department;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +13,7 @@ public class DepartmentToDepartmentDtoConverter implements Function<Department, 
     @Override
     public DepartmentResponseDto apply(Department department) {
         DepartmentResponseDto departmentDto = new DepartmentResponseDto();
+        departmentDto.setId(department.getId());
         departmentDto.setName(department.getName());
         Optional.ofNullable(department.getDepartmentParent()).ifPresent(p -> departmentDto.setDepartmentParentId(p.getId()));
         Optional.ofNullable(department.getBoss()).ifPresent(b -> departmentDto.setBossId(b.getId()));

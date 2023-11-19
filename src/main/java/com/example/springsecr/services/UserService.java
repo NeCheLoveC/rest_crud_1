@@ -1,10 +1,10 @@
 package com.example.springsecr.services;
 
 import com.example.springsecr.dto.converter.UserRegisterRequestConverter;
-import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
-import com.example.springsecr.dto.model.UserUpdateDTO;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
 import com.example.springsecr.exceptions.BadRequestException;
-import com.example.springsecr.exceptions.UsernameAlreadyExist;
+import com.example.springsecr.exceptions.HttpCustomException;
 import com.example.springsecr.models.Department;
 import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
@@ -13,7 +13,13 @@ import com.example.springsecr.repositories.UserRepositories;
 import com.example.springsecr.utils.BCryptEncoderWrapper;
 import com.example.springsecr.validators.UserRegistrationDtoValidator;
 import com.example.springsecr.validators.UserUpdateDtoValidator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.*;
 import lombok.AllArgsConstructor;
+import org.antlr.v4.runtime.atn.EmptyPredictionContext;
+import org.hibernate.query.sqm.tree.predicate.SqmInListPredicate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,12 +28,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AllArgsConstructor
+@AllArgsConstructor()
 public class UserService implements UserDetailsService
 {
     private DepartmentRepositories departmentRepositories;
@@ -38,6 +47,9 @@ public class UserService implements UserDetailsService
     private UserRegisterRequestConverter userRegisterConverter;
     private UserRegistrationDtoValidator userRegistrationDtoValidator;
     private UserUpdateDtoValidator userUpdateDtoValidator;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public Optional<User> getUserByUsername(String username)
     {
@@ -64,19 +76,19 @@ public class UserService implements UserDetailsService
     }
 
     @Transactional()
-    public User saveUser(UserRegisterCredentionalsRequestDto newUser) throws UsernameAlreadyExist
+    public User saveUser(UserRegisterCredentionalsRequestDto newUser)
     {
         BindingResult bindingResult1 = new DirectFieldBindingResult(newUser, "newUser");
         userRegistrationDtoValidator.validate(newUser, bindingResult1);
         if(bindingResult1.hasErrors())
-            throw new BadRequestException(bindingResult1.getAllErrors().stream().map(er -> er.getObjectName() + " : " + er.getDefaultMessage()).collect(Collectors.joining()));
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST,bindingResult1.getAllErrors().stream().map(er -> er.getObjectName() + " : " + er.getDefaultMessage()).collect(Collectors.joining()));
         User user = userRegisterConverter.apply(newUser);
         User returnedUser = userRepo.save(user);
         return returnedUser;
     }
 
     @Transactional
-    public User update(UserUpdateDTO userUpdateDTO)
+    public User update(UserUpdateRequestDTO userUpdateDTO)
     {
         Optional<User> userWrapper = userRepo.findById(userUpdateDTO.getId());
         BindingResult bindingResult = new DirectFieldBindingResult(userUpdateDTO, "userUpdateDTO");
@@ -92,10 +104,51 @@ public class UserService implements UserDetailsService
     {
         Optional<User> user = userRepo.findById(userId);
         user.orElseThrow(() -> new BadRequestException("Пользователь с id = %s не найден".formatted(userId)));
-        Optional<Department> department = departmentRepositories.findById(departmentId);
-        department.orElseThrow(() -> new BadRequestException("Департамент с id = %s не найден"));
-        user.get().setDepartment(department.get());
+        if(Objects.nonNull(departmentId))
+        {
+            Optional<Department> department = departmentRepositories.findById(departmentId);
+            department.orElseThrow(() -> new BadRequestException("Департамент с id = %s не найден"));
+            user.get().setDepartment(department.get());
+        }
+        else
+        {
+            user.get().setDepartment(null);
+        }
         return user.get();
+    }
+
+    public Collection<User> findUsersByPredicate(String username, String email, String position)
+    {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<User> criteriaQuery = cb.createQuery(User.class);
+        Root<User> root = criteriaQuery.from(User.class);
+        Predicate predicate = null;
+        Predicate partOfConditional = null;
+        if(username != null)
+        {
+            predicate = cb.like(root.get("username"),username + "%");
+        }
+        if(email != null)
+        {
+            partOfConditional = cb.like(root.get("email"),email + "%");
+            if(predicate == null)
+                predicate = partOfConditional;
+            else
+                predicate = cb.and(predicate, partOfConditional);
+        }
+        if(position != null)
+        {
+            partOfConditional = cb.like(root.get("position"),position);
+            if(predicate == null)
+                predicate = partOfConditional;
+            else
+                predicate = cb.and(predicate, partOfConditional);
+        }
+
+        if(predicate != null)
+            criteriaQuery.where(predicate);
+
+        return entityManager.createQuery(criteriaQuery).getResultList();
     }
 
     public Optional<User> findById(Long id)
@@ -118,4 +171,6 @@ public class UserService implements UserDetailsService
     {
         return userRepo.count();
     }
+
+
 }

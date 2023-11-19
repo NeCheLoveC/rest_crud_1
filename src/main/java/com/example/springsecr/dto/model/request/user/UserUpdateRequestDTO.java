@@ -1,16 +1,13 @@
-package com.example.springsecr.dto.model;
+package com.example.springsecr.dto.model.request.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-public class UserUpdateDTO
+public class UserUpdateRequestDTO
 {
     @JsonIgnore
     public long id;

@@ -1,16 +1,12 @@
 package com.example.springsecr.validators;
 
-import com.example.springsecr.dto.model.UserUpdateDTO;
-import com.example.springsecr.exceptions.BadRequestException;
-import com.example.springsecr.models.Department;
+import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
 import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.repositories.UserRepositories;
-import com.example.springsecr.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
@@ -27,13 +23,13 @@ public class UserUpdateDtoValidator implements Validator
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.equals(UserUpdateDTO.class);
+        return clazz.equals(UserUpdateRequestDTO.class);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     @Override
     public void validate(Object target, Errors errors) throws EntityNotFoundException{
-        UserUpdateDTO userUpdateDTO = (UserUpdateDTO) target;
+        UserUpdateRequestDTO userUpdateDTO = (UserUpdateRequestDTO) target;
         Optional<User> userWrapper = userRepositories.findById(userUpdateDTO.getId());
 
         //Если пользователь не найден по id -> ошибка
@@ -41,7 +37,7 @@ public class UserUpdateDtoValidator implements Validator
         validateEmailAndDepartmentIntoUserUpdateDto(userUpdateDTO, userWrapper.get(), errors);
     }
 
-    private void validateEmailAndDepartmentIntoUserUpdateDto(UserUpdateDTO userUpdateDTO, User userForUpdate, Errors errors)
+    private void validateEmailAndDepartmentIntoUserUpdateDto(UserUpdateRequestDTO userUpdateDTO, User userForUpdate, Errors errors)
     {
         //Проверка на существование User с данным id
         Optional<User> user = userRepositories.findById(userUpdateDTO.getId());

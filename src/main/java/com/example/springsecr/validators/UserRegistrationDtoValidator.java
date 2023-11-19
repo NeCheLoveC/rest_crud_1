@@ -1,6 +1,6 @@
 package com.example.springsecr.validators;
 
-import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
 import com.example.springsecr.services.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;

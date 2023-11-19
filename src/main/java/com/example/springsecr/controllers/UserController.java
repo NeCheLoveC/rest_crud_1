@@ -1,7 +1,10 @@
 package com.example.springsecr.controllers;
 
-import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
-import com.example.springsecr.dto.model.UserUpdateDTO;
+import com.example.springsecr.dto.converter.UserToUserResponseDTOConverter;
+import com.example.springsecr.dto.model.request.user.UpdateUserDepartmentsDTO;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
+import com.example.springsecr.dto.model.response.UserResponseDTO;
 import com.example.springsecr.models.RoleType;
 import com.example.springsecr.services.UserService;
 import jakarta.validation.Valid;
@@ -13,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserController
 {
     private UserService userService;
+    private UserToUserResponseDTOConverter userToUserResponseDTOConverter;
 
     @PostMapping
     public ResponseEntity<?> register(
@@ -50,7 +55,7 @@ public class UserController
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
-            @Valid @RequestBody UserUpdateDTO userUpdateDTO,
+            @Valid @RequestBody UserUpdateRequestDTO userUpdateDTO,
             BindingResult bindingResult,
             @PathVariable("id") long id
     )
@@ -61,10 +66,19 @@ public class UserController
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{idUser}/departments/{idDepartment}")
-    public ResponseEntity<?> setUserDepartment(@PathVariable("idUser") Long idUser, @PathVariable("idDepartment") Long idDepartment)
+    @PutMapping("/{idUser}/department")
+    public ResponseEntity<?> setUserDepartment(@PathVariable("idUser") Long idUser, @RequestBody UpdateUserDepartmentsDTO updateUserDepartmentsDTO)
     {
-        userService.setDepartment(idUser, idDepartment);
+        userService.setDepartment(idUser, updateUserDepartmentsDTO.getDepartmentId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllUserByPredicate(@RequestParam(value = "username", required = false) String username,
+                                                   @RequestParam(value = "email" , required = false) String email,
+                                                   @RequestParam(value = "position", required = false) String position)
+    {
+        List<UserResponseDTO> users =  userService.findUsersByPredicate(username, email, position).stream().map(userToUserResponseDTOConverter).collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 }

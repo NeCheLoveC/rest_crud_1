@@ -1,4 +1,4 @@
-package com.example.springsecr.dto.model;
+package com.example.springsecr.dto.model.request.user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

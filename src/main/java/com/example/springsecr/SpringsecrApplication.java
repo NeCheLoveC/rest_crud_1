@@ -1,7 +1,8 @@
 package com.example.springsecr;
 
 import com.example.springsecr.dto.converter.UserRegisterRequestConverter;
-import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.services.DepartmentService;
 import com.example.springsecr.services.RoleService;
 import com.example.springsecr.services.UserService;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class SpringsecrApplication {
     }
 
     @Bean
-    public CommandLineRunner init(RoleService roleService, UserService userService)
+    public CommandLineRunner init(RoleService roleService, UserService userService, DepartmentService departmentService)
     {
         return (args) ->
         {
@@ -32,6 +33,10 @@ public class SpringsecrApplication {
             if(userService.getCountUser() == 0)
             {
                 createFirstUserAdmin();
+            }
+            if(departmentService.count() == 0)
+            {
+                //init корневой департамент
             }
         };
     }

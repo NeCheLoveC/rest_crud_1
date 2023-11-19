@@ -1,16 +1,11 @@
 package com.example.springsecr.validators;
 
-import com.example.springsecr.dto.model.DepartmentCreateRequestDTO;
-import com.example.springsecr.exceptions.BadRequestException;
+import com.example.springsecr.dto.model.request.department.DepartmentCreateRequestDTO;
 import com.example.springsecr.models.Department;
 import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.repositories.UserRepositories;
-import lombok.Setter;
-import org.hibernate.Session;
-import org.hibernate.service.spi.InjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;

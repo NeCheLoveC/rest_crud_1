@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
@@ -48,7 +50,20 @@ public class User implements Cloneable{
     private Collection<Role> roles = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "department_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Department department;
+
+    @OneToOne(mappedBy = "moderator")
+    private Department moderatorBy;
+    @OneToOne(mappedBy = "boss")
+    private Department bossBy;
+
+    //Должнотсь
+    @Column(name = "position")
+    private String position;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
     protected User(){}
 
@@ -124,5 +139,29 @@ public class User implements Cloneable{
     @Override
     public int hashCode() {
         return username.hashCode();
+    }
+
+    public Department getModeratorBy() {
+        return moderatorBy;
+    }
+
+    public Department getBossBy() {
+        return bossBy;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

@@ -1,6 +1,6 @@
 package com.example.springsecr.controllers;
 
-import com.example.springsecr.dto.model.UsernamePasswordRequestDTO;
+import com.example.springsecr.dto.model.request.user.UsernamePasswordRequestDTO;
 import com.example.springsecr.security.JwtUtils;
 import com.example.springsecr.services.UserService;
 import com.example.springsecr.utils.BCryptEncoderWrapper;

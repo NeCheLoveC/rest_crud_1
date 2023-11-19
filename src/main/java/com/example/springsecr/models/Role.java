@@ -1,18 +1,14 @@
 package com.example.springsecr.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "role")
-public class Role
-{
+public class Role {
     private static final String generatorName = "role_sequence_gen";
 
     @Id

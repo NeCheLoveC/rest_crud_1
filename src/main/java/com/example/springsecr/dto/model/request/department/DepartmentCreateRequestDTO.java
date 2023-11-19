@@ -1,17 +1,9 @@
-package com.example.springsecr.dto.model;
+package com.example.springsecr.dto.model.request.department;
 
-import com.example.springsecr.models.Department;
-import com.example.springsecr.models.User;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Collection;
 
 @Getter
 @Setter

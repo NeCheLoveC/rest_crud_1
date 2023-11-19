@@ -1,9 +1,5 @@
-package com.example.springsecr.dto.model;
+package com.example.springsecr.dto.model.response;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class DepartmentResponseDto
 {
+    private Long id;
     private String name;
     private Long departmentParentId;
     private Long moderatorId;

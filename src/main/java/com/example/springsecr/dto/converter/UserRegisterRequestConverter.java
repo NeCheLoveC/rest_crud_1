@@ -1,6 +1,6 @@
 package com.example.springsecr.dto.converter;
 
-import com.example.springsecr.dto.model.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
 import com.example.springsecr.models.Role;
 import com.example.springsecr.models.RoleType;
 import com.example.springsecr.models.User;
