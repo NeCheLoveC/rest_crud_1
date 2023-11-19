@@ -1,5 +1,6 @@
 package com.example.springsecr.dto.model.request.user;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class UpdateUserDepartmentsDTO
 {
+    @NotNull
     private Long departmentId;
 }

@@ -31,4 +31,7 @@ public interface UserRepositories extends JpaRepository<User, Long>
     @Query("select u from User u where u.id = :userId")
     @Transactional
     public Optional<User> findByIdPessimisticLockRead(Long userId);
+
+    @Query("select distinct u from User u join u.roles r where r.name like 'ROLE_ADMIN'")
+    public Optional<User> getAdmin();
 }

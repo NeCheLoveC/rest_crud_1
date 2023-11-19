@@ -172,5 +172,8 @@ public class UserService implements UserDetailsService
         return userRepo.count();
     }
 
-
+    public Optional<User> getAdmin()
+    {
+        return userRepo.getAdmin();
+    }
 }

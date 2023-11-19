@@ -11,7 +11,10 @@ import java.util.Collections;
 import java.util.Objects;
 
 @Entity
-@Table(name = "department", indexes = {@Index(name = "idx_department_department_parent_id", columnList = "department_parent_id")})
+@Table(name = "department", indexes = {
+        @Index(name = "idx_department_department_parent_id", columnList = "department_parent_id"),
+        @Index(name = "idx_department_name", columnList = "name")
+})
 @Setter
 @Getter
 public class Department
@@ -21,6 +24,7 @@ public class Department
     @SequenceGenerator(name = "department_generator_id_seq", sequenceName = "department_generator_id_seq")
     @Setter(AccessLevel.PRIVATE)
     private Long id;
+    @Column(name = "name", unique = true)
     private String name;
     @OneToOne
     @JoinTable(
@@ -44,6 +48,9 @@ public class Department
 
     @OneToMany(mappedBy = "departmentParent")
     private Collection<Department> departments;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
     public Department() {}
 

@@ -20,8 +20,8 @@ public class RoleService
     private Role MODERATOR_ROLE;
     private Role ADMIN_ROLE;
 
-    @PostConstruct
-    private void init()
+    //@PostConstruct
+    public void init()
     {
         //Получаем синглтон-отображения каждой роли (закешировать каждую роль), если данной роли нет в БД - создаем ее
         roleRepositories.getRoleByName(RoleType.USER.getRoleName()).ifPresentOrElse(t -> this.USER_ROLE = t, () -> this.USER_ROLE = roleRepositories.save(new Role(RoleType.USER.getRoleName())));

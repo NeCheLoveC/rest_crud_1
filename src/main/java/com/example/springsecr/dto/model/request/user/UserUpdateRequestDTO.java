@@ -12,9 +12,10 @@ public class UserUpdateRequestDTO
     @JsonIgnore
     public long id;
     @Email
-    @NotEmpty
+    @NotNull
     private String email;
     @NotNull
     @Size(min = 5)
     private String password;
+    private boolean isDeleted;
 }
