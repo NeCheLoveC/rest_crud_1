@@ -24,8 +24,8 @@ public interface UserRepositories extends JpaRepository<User, Long>
 
     @Query("select count(*) from User")
     @Transactional
-
     public long count();
+    @Transactional
     public Optional<User> getUserByEmail(String email);
 
     @Lock(LockModeType.PESSIMISTIC_READ)
@@ -33,6 +33,7 @@ public interface UserRepositories extends JpaRepository<User, Long>
     @Transactional
     public Optional<User> findByIdPessimisticLockRead(Long userId);
 
-    @Query("select distinct u from User u join u.roles r where r.name like 'ROLE_ADMIN'")
+    @Transactional
+    @Query("select u from User u where u.role.name like 'ROLE_ADMIN'")
     public Optional<User> getAdmin();
 }

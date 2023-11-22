@@ -40,6 +40,7 @@ public class User implements Cloneable{
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    /*
     @NotEmpty
     @ManyToMany
     @JoinTable(
@@ -48,6 +49,10 @@ public class User implements Cloneable{
             inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false)
     )
     private Collection<Role> roles = new ArrayList<>();
+     */
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
     @ManyToOne
     @JoinColumn(name = "department_id")
     @NotNull
@@ -73,15 +78,15 @@ public class User implements Cloneable{
         this.password = password;
     }
 
-    private User(String username, String password, Collection<Role> roles)
+    private User(String username, String password, Role role)
     {
         this.username = username;
         this.password = password;
-        this.roles = roles;
+        this.role = role;
     }
 
-    public User(String username, String password, String email, Collection<Role> roles) {
-        this(username,password,roles);
+    public User(String username, String password, String email, Role role) {
+        this(username,password,role);
         this.email = email;
     }
 
@@ -105,12 +110,12 @@ public class User implements Cloneable{
         this.password = password;
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public String getEmail() {

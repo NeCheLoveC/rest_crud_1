@@ -23,7 +23,7 @@ public class UserRegisterRequestConverter implements Function<UserRegisterCreden
     @Override
     public User apply(UserRegisterCredentionalsRequestDto object) {
         RoleType userRole = RoleType.valueOf(object.getRole().substring(RoleType.ROLE_SUFFIX.length()));
-        Collection<Role> usersAuthorities = Collections.singletonList(roleService.getRoleEntityByRoleEnum(userRole));
+        Role usersAuthorities = roleService.getRoleEntityByRoleEnum(userRole);
         User user = new User(object.getUsername(),bCryptEncoderWrapper.getbCryptEncoderWrapper().encode(object.getPassword()), object.getEmail(), usersAuthorities);
         return user;
     }
