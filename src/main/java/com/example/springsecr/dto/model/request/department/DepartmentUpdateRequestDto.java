@@ -15,5 +15,4 @@ public class DepartmentUpdateRequestDto
     private Long id;
     @NotBlank
     private String name;
-    private boolean isDeleted;
 }

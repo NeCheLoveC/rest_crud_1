@@ -50,7 +50,8 @@ public class User implements Cloneable{
     private Collection<Role> roles = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "department_id")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @NotNull
+    //@OnDelete(action = OnDeleteAction.SET_NULL)
     private Department department;
 
     @OneToOne(mappedBy = "moderator")
@@ -126,6 +127,8 @@ public class User implements Cloneable{
 
     public void setDepartment(Department department) {
         this.department = department;
+        if(department != null)
+            department.getEmployers().add(this);
     }
 
     @Override
@@ -163,5 +166,13 @@ public class User implements Cloneable{
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    void setModeratorBy(Department moderatorBy) {
+        this.moderatorBy = moderatorBy;
+    }
+
+    void setBossBy(Department bossBy) {
+        this.bossBy = bossBy;
     }
 }

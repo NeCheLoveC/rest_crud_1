@@ -1,5 +1,6 @@
 package com.example.springsecr.repositories;
 
+import com.example.springsecr.models.RoleType;
 import com.example.springsecr.models.User;
 import jakarta.persistence.LockModeType;
 import org.hibernate.annotations.NamedQuery;

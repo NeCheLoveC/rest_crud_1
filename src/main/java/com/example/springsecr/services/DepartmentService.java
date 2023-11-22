@@ -30,10 +30,11 @@ public class DepartmentService
 {
     private final DepartmentRepositories departmentRepositories;
     private final UserRepositories userRepositories;
-    private static final String BOSS_POSITION = "Руководитель департамента";
+    public static final String BOSS_POSITION = "Руководитель департамента";
     private UserService userService;
 
     private final DepartmentCreateDtoValidator departmentCreateDtoValidator;
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Department create(DepartmentCreateRequestDTO departmentDto)
     {
         BindingResult bindingResult = new DirectFieldBindingResult(departmentDto, "departmentDto");
@@ -50,15 +51,22 @@ public class DepartmentService
         }
         if(departmentDto.getBossId() != null)
         {
-            User boss = userRepositories.findById(departmentDto.getBossId()).get();
+            Optional<User> bossWrapper = userRepositories.findByIdPessimisticLockRead(departmentDto.getBossId());
+            bossWrapper.orElseThrow(() -> new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Пользователь с id = %d не найден", departmentDto.getBossId())));
+            User boss = bossWrapper.get();
+
+
             department.setBoss(boss);
-            department.setModerator(boss);
+            if(departmentDto.getModeratorId() == null)
+                department.setModerator(boss);
         }
         if(departmentDto.getModeratorId() != null)
         {
-            department.setModerator(userRepositories.findById(departmentDto.getModeratorId()).get());
+            Optional<User> moderatorWrapper = userRepositories.findByIdPessimisticLockRead(departmentDto.getModeratorId());
+            moderatorWrapper.orElseThrow(() -> new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Пользователь с id = %d не найден", departmentDto.getModeratorId())));
+            department.setModerator(moderatorWrapper.get());
+            //moderatorWrapper.get().setDepartment(department);
         }
-        //department.set
         return departmentRepositories.save(department);
     }
 
@@ -75,6 +83,7 @@ public class DepartmentService
         return department.get();
     }
 
+    // TODO: 20.11.2023 Не использовать данный метод (он полностью удаляет сущность из БД)
     public void delete(Long id)
     {
         Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticREAD(id);
@@ -143,5 +152,25 @@ public class DepartmentService
     public long count()
     {
         return departmentRepositories.count();
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void inactive(Long id)
+    {
+        Optional<Department> departmentWrapper = departmentRepositories.findById(id);
+        departmentWrapper.orElseThrow(() -> new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Департамент с id = %d не найден", id)));
+        Department department = departmentWrapper.get();
+        //Нельзя пометить "уделнный" главный департамент!
+        if(department.getDepartmentParent() == null)
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Нельзя пометить как \'удаленный\' главный (корневой) департамент");
+        department.setDeleted(true);
+        department.getDepartments().stream().forEach(d -> d.setDepartmentParent(department.getDepartmentParent()));
+        department.getEmployers().stream().forEach(emp ->
+        {
+            emp.setPosition("");
+            emp.setDepartment(department.getDepartmentParent());
+        });
+        department.setBoss(null);
+        department.setModerator(null);
     }
 }

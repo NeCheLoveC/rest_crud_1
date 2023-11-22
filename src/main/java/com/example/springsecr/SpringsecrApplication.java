@@ -3,7 +3,9 @@ package com.example.springsecr;
 import com.example.springsecr.dto.converter.UserRegisterRequestConverter;
 import com.example.springsecr.dto.model.request.department.DepartmentCreateRequestDTO;
 import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.models.Department;
 import com.example.springsecr.models.User;
+import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.services.DepartmentService;
 import com.example.springsecr.services.RoleService;
 import com.example.springsecr.services.UserService;
@@ -20,10 +22,8 @@ import java.util.Optional;
 @AllArgsConstructor
 public class SpringsecrApplication {
 
-
     protected RoleService roleService;
     protected UserService userService;
-    protected UserRegisterRequestConverter converterUserRegisterDto;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringsecrApplication.class, args);

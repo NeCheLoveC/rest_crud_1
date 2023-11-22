@@ -17,5 +17,4 @@ public class UserUpdateRequestDTO
     @NotNull
     @Size(min = 5)
     private String password;
-    private boolean isDeleted;
 }
