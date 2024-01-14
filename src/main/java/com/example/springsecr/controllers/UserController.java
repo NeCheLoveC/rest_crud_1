@@ -2,9 +2,10 @@ package com.example.springsecr.controllers;
 
 import com.example.springsecr.dto.converter.UserToUserResponseDTOConverter;
 import com.example.springsecr.dto.model.request.user.UpdateUserDepartmentsDTO;
-import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentialsRequestDto;
 import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
 import com.example.springsecr.dto.model.response.UserResponseDTO;
+import com.example.springsecr.exceptions.HttpCustomException;
 import com.example.springsecr.models.RoleType;
 import com.example.springsecr.services.UserService;
 import jakarta.validation.Valid;
@@ -29,27 +30,12 @@ public class UserController
 
     @PostMapping
     public ResponseEntity<?> register(
-            @RequestBody @Valid UserRegisterCredentionalsRequestDto credentionals,
-            BindingResult result,
-            Authentication authentication)
+            @RequestBody @Valid UserRegisterCredentialsRequestDto credentials,
+            BindingResult result)
     {
         if(result.hasErrors())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getAllErrors().stream().map(k -> k.getObjectName()).collect(Collectors.toUnmodifiableList()));
-        if(credentionals.getRole().equals(RoleType.MODERATOR.getRoleName()))
-        {
-            //Проверяем, есть ли у отправителя доступ для создания новых User с ролью "Модератор"
-            if(authentication == null)
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("У вас нет прав создавать модераторов");
-            if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().
-                    noneMatch(
-                    (i) -> i.getAuthority().equals(RoleType.ADMIN.getRoleName())
-                    )
-            )
-            {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("У вас не прав создавать модераторов");
-            }
-        }
-        userService.saveUser(credentionals);
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST, result);
+        userService.saveUser(credentials);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

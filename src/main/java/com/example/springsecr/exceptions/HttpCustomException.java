@@ -16,7 +16,6 @@ public class HttpCustomException extends RuntimeException
     protected String message;
     public HttpCustomException(HttpStatus httpStatus)
     {
-        super();
         this.httpStatus = httpStatus;
     }
     public HttpCustomException(HttpStatus httpStatus, String message)
@@ -28,15 +27,13 @@ public class HttpCustomException extends RuntimeException
     public HttpCustomException(HttpStatus httpStatus, BindingResult bindingResult)
     {
         this(httpStatus);
-        if(bindingResult == null)
-            throw new RuntimeException("bindingResult не должен равняться null");
         this.message = convertBindingResultToMap(bindingResult).toString();
     }
 
     private String convertBindingResultToMap(BindingResult bindingResult)
     {
         Map<String, String> errors = new HashMap<>();
-        bindingResult.getAllErrors().stream().peek(error -> {
+        bindingResult.getAllErrors().stream().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String message = error.getDefaultMessage();
             errors.put(fieldName, message);

@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Component
-public class DepartmentToDepartmentDtoConverter implements Function<Department, DepartmentResponseDto>
+public class DepartmentToDepartmentResponseDtoConverter implements Function<Department, DepartmentResponseDto>
 {
     @Override
     public DepartmentResponseDto apply(Department department) {

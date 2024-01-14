@@ -57,6 +57,7 @@ public class SecurityConfig
 
     public DaoAuthenticationProvider daoAuthenticationProvider()
     {
+        System.out.println("Вызвался ДАО");
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userService);
         daoAuthenticationProvider.setPasswordEncoder(bCryptEncoderWrapper.getbCryptEncoderWrapper());

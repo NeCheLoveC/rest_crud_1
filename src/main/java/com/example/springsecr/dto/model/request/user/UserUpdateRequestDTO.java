@@ -15,6 +15,5 @@ public class UserUpdateRequestDTO
     @NotNull
     private String email;
     @NotNull
-    @Size(min = 5)
-    private String password;
+    private String position;
 }

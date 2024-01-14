@@ -1,12 +1,11 @@
 package com.example.springsecr.controllers;
 
-import com.example.springsecr.dto.converter.DepartmentToDepartmentDtoConverter;
+import com.example.springsecr.dto.converter.DepartmentToDepartmentResponseDtoConverter;
 import com.example.springsecr.dto.model.request.department.DepartmentAdminUpdateRequestDto;
 import com.example.springsecr.dto.model.request.department.DepartmentBossUpdateRequestDto;
 import com.example.springsecr.dto.model.request.department.DepartmentCreateRequestDTO;
 import com.example.springsecr.dto.model.response.DepartmentResponseDto;
 import com.example.springsecr.dto.model.request.department.DepartmentUpdateRequestDto;
-import com.example.springsecr.exceptions.BadRequestException;
 import com.example.springsecr.exceptions.HttpCustomException;
 import com.example.springsecr.services.DepartmentService;
 import jakarta.validation.Valid;
@@ -27,19 +26,19 @@ import java.util.stream.Collectors;
 @Validated
 public class DepartmentController
 {
-    private final DepartmentToDepartmentDtoConverter departmentToDepartmentDtoConverter;
+    private final DepartmentToDepartmentResponseDtoConverter departmentToDepartmentDtoConverter;
     private final DepartmentService departmentService;
     @GetMapping
     public ResponseEntity<List<DepartmentResponseDto>> findAll()
     {
-        List<DepartmentResponseDto> list = departmentService.getAll().stream().map(departmentToDepartmentDtoConverter).collect(Collectors.toList());
+        List<DepartmentResponseDto> list = departmentService.getAllActiveDepartments().stream().map(departmentToDepartmentDtoConverter).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
     @PostMapping()
     public ResponseEntity<?> create(@RequestBody @Validated DepartmentCreateRequestDTO departmentDto, BindingResult bindingResult)
     {
         if(bindingResult.hasErrors())
-            throw new BadRequestException(bindingResult.getAllErrors().stream().map(t -> t.getDefaultMessage()).collect(Collectors.joining()));
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST,bindingResult);
         return ResponseEntity.ok(departmentToDepartmentDtoConverter.apply(departmentService.create(departmentDto)));
     }
 
@@ -80,5 +79,4 @@ public class DepartmentController
         departmentService.setDepartmentBoss(updateDto.getBossId(),departmentId);
         return ResponseEntity.ok().build();
     }
-
 }

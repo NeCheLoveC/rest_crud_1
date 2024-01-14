@@ -1,11 +1,13 @@
 package com.example.springsecr.validators;
 
 import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
+import com.example.springsecr.exceptions.HttpCustomException;
 import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.repositories.UserRepositories;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,26 +35,22 @@ public class UserUpdateDtoValidator implements Validator
         Optional<User> userWrapper = userRepositories.findById(userUpdateDTO.getId());
 
         //Если пользователь не найден по id -> ошибка
-        userWrapper.orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id '%d' не найден.", userUpdateDTO.getId())));
-        validateEmailAndDepartmentIntoUserUpdateDto(userUpdateDTO, userWrapper.get(), errors);
+        userWrapper.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Пользователь с id '%d' не найден.", userUpdateDTO.getId())));
+        validateEmailIntoUserUpdateDto(userUpdateDTO, errors);
     }
 
-    private void validateEmailAndDepartmentIntoUserUpdateDto(UserUpdateRequestDTO userUpdateDTO, User userForUpdate, Errors errors)
+    private void validateEmailIntoUserUpdateDto(UserUpdateRequestDTO userUpdateDTO, Errors errors)
     {
-        //Проверка на существование User с данным id
-        Optional<User> user = userRepositories.findById(userUpdateDTO.getId());
-        if(user.isEmpty())
-            errors.rejectValue("id", "","Пользователь");
-
+        User user = userRepositories.findById(userUpdateDTO.getId()).get();
         //Проверка email
         Optional<User> userWithSameEmail = userRepositories.getUserByEmail(userUpdateDTO.getEmail());
 
-        if(userWithSameEmail.isPresent())
+        //Если найденный email уже занят другим пользователем - ошибка
+
+        if(userWithSameEmail.isPresent() && !userWithSameEmail.get().equals(user))
         {
             //Если найденный email уже занят другим пользователем - ошибка
-            if(!Objects.equals(userWithSameEmail.get().getId(), userForUpdate.getId()))
-                errors.rejectValue("email", "", String.format("Данный email (%s) уже используется другим пользователем.",userForUpdate.getEmail()));
-                //throw new BadRequestException(String.format("Данный email (%s) уже используется другим пользователем.",userForUpdate.getEmail()));
+            errors.rejectValue("email", "", String.format("Данный email (%s) уже используется другим пользователем с id = %d",userUpdateDTO.getEmail(), userWithSameEmail.get().getId()));
         }
     }
 

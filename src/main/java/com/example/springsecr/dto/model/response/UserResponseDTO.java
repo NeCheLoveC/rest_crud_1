@@ -11,4 +11,5 @@ public class UserResponseDTO
     private String username;
     private String email;
     private DepartmentResponseDto department;
+    private String position;
 }

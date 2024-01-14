@@ -1,9 +1,8 @@
 package com.example.springsecr.services;
 
 import com.example.springsecr.dto.converter.UserRegisterRequestConverter;
-import com.example.springsecr.dto.model.request.user.UserRegisterCredentionalsRequestDto;
+import com.example.springsecr.dto.model.request.user.UserRegisterCredentialsRequestDto;
 import com.example.springsecr.dto.model.request.user.UserUpdateRequestDTO;
-import com.example.springsecr.exceptions.BadRequestException;
 import com.example.springsecr.exceptions.HttpCustomException;
 import com.example.springsecr.models.Department;
 import com.example.springsecr.models.User;
@@ -13,12 +12,12 @@ import com.example.springsecr.repositories.UserRepositories;
 import com.example.springsecr.utils.BCryptEncoderWrapper;
 import com.example.springsecr.validators.UserRegistrationDtoValidator;
 import com.example.springsecr.validators.UserUpdateDtoValidator;
+import com.fasterxml.jackson.core.JsonToken;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.AllArgsConstructor;
-import org.antlr.v4.runtime.atn.EmptyPredictionContext;
-import org.hibernate.query.sqm.tree.predicate.SqmInListPredicate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -73,12 +72,12 @@ public class UserService implements UserDetailsService
     }
 
     @Transactional()
-    public User saveUser(UserRegisterCredentionalsRequestDto newUser)
+    public User saveUser(UserRegisterCredentialsRequestDto newUser)
     {
         BindingResult bindingResult1 = new DirectFieldBindingResult(newUser, "newUser");
         userRegistrationDtoValidator.validate(newUser, bindingResult1);
         if(bindingResult1.hasErrors())
-            throw new HttpCustomException(HttpStatus.BAD_REQUEST,bindingResult1.getAllErrors().stream().map(er -> er.getObjectName() + " : " + er.getDefaultMessage()).collect(Collectors.joining()));
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST,bindingResult1);
         User user = userRegisterConverter.apply(newUser);
         User returnedUser = userRepo.save(user);
         return returnedUser;
@@ -90,30 +89,38 @@ public class UserService implements UserDetailsService
         Optional<User> userWrapper = userRepo.findById(userUpdateDTO.getId());
         BindingResult bindingResult = new DirectFieldBindingResult(userUpdateDTO, "userUpdateDTO");
         userUpdateDtoValidator.validate(userUpdateDTO, bindingResult);
-        User user = userRepo.findById(userUpdateDTO.getId()).get();
+        if(bindingResult.hasErrors())
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST, bindingResult);
+
+        User user = userWrapper.get();
         user.setEmail(userUpdateDTO.getEmail());
-        user.setPassword(bCryptPasswordWrapper.getbCryptEncoderWrapper().encode(userUpdateDTO.getPassword()));
+        user.setPosition(userUpdateDTO.getPosition());
+        //user.setPassword(bCryptPasswordWrapper.getbCryptEncoderWrapper().encode(userUpdateDTO.getPassword()));
         return user;
     }
 
     @Transactional
     public User setDepartment(Long userId, Long departmentId)
     {
-        Optional<User> user = userRepo.findById(userId);
-        user.orElseThrow(() -> new BadRequestException("Пользователь с id = %s не найден".formatted(userId)));
+        Optional<User> userWrapper = userRepo.findById(userId);
+        userWrapper.orElseThrow(() -> new HttpCustomException(HttpStatus.BAD_REQUEST, "Пользователь с id = %s не найден".formatted(userId)));
+        User user = userWrapper.get();
+        if(user.getRole().equals(RoleService.getADMIN_ROLE()))
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST,"Нельзя изменить департамент у администратора");
         if(Objects.nonNull(departmentId))
         {
             Optional<Department> department = departmentRepositories.findById(departmentId);
-            department.orElseThrow(() -> new BadRequestException("Департамент с id = %s не найден"));
-            user.get().setDepartment(department.get());
+            department.orElseThrow(() -> new HttpCustomException(HttpStatus.BAD_REQUEST, "Департамент с id = %s не найден"));
+            user.setDepartment(department.get());
         }
         else
         {
-            user.get().setDepartment(null);
+            user.setDepartment(null);
         }
-        return user.get();
+        return user;
     }
 
+    @Transactional
     public Collection<User> findUsersByPredicate(String username, String email, String position)
     {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -121,13 +128,14 @@ public class UserService implements UserDetailsService
         Root<User> root = criteriaQuery.from(User.class);
         Predicate predicate = null;
         Predicate partOfConditional = null;
+
         if(username != null)
         {
-            predicate = cb.like(root.get("username"),username + "%");
+            predicate = cb.like(cb.function("lower",String.class,root.get("username")),username.toLowerCase() + "%");
         }
         if(email != null)
         {
-            partOfConditional = cb.like(root.get("email"),email + "%");
+            partOfConditional = cb.like(cb.function("lower", String.class, root.get("email")),email.toLowerCase() + "%");
             if(predicate == null)
                 predicate = partOfConditional;
             else
@@ -135,7 +143,7 @@ public class UserService implements UserDetailsService
         }
         if(position != null)
         {
-            partOfConditional = cb.like(root.get("position"),position);
+            partOfConditional = cb.like(cb.function("lower", String.class, root.get("position")),position.toLowerCase() + "%");
             if(predicate == null)
                 predicate = partOfConditional;
             else
@@ -144,10 +152,11 @@ public class UserService implements UserDetailsService
 
         if(predicate != null)
             criteriaQuery.where(predicate);
-
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        TypedQuery<User> q = entityManager.createQuery(criteriaQuery);
+        return q.getResultList();
     }
 
+    @Transactional
     public Optional<User> findById(Long id)
     {
         return userRepo.findById(id);

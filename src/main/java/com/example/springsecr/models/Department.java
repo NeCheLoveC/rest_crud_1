@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -26,13 +27,13 @@ public class Department
     @SequenceGenerator(name = "department_generator_id_seq", sequenceName = "department_generator_id_seq")
     @Setter(AccessLevel.PRIVATE)
     private Long id;
-    @Column(name = "name", unique = true)
+    @Column(name = "name", unique = true, nullable = false)
     @NotBlank
     @Size(min = 5)
     private String name;
     @OneToOne(optional = true)
     @JoinTable(
-            name = "department_user",
+            name = "department_moderator",
             joinColumns = {@JoinColumn(name = "department_id", unique = true, nullable = false),},
             inverseJoinColumns = {@JoinColumn(name = "user_id", unique = true, nullable = false)}
     )
@@ -46,18 +47,21 @@ public class Department
     )
     //@OnDelete(action = OnDeleteAction.SET_NULL)
     private User boss;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "department_parent_id")
     private Department departmentParent;
 
     @OneToMany(mappedBy = "departmentParent")
     private Set<Department> departments = new HashSet<>();
 
+    /*
     @OneToMany(mappedBy = "department")
     @Setter(AccessLevel.PRIVATE)
     private Set<User> employers = new HashSet<>();
+     */
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", nullable = false)
+    @ColumnDefault("false")
     private boolean isDeleted;
 
     public Department() {}
@@ -78,13 +82,9 @@ public class Department
 
 
     public void setModerator(User moderator) {
-        if (Objects.isNull(moderator))
+        if (Objects.isNull(moderator) && Objects.nonNull(this.moderator))
         {
-            if(Objects.nonNull(this.moderator))
-            {
-                this.moderator.setModeratorBy(null);
-                // TODO: 21.11.2023 Изменить
-            }
+            this.moderator.setModeratorBy(null);
             this.moderator = null;
         }
         else if(!Objects.equals(moderator, this.moderator))
@@ -106,16 +106,13 @@ public class Department
     }
 
     public void setBoss(User boss) {
-        if(Objects.isNull(boss))
+        //Если мы хотим убрать текущего босса И Если есть босс - отвязать его от Департамента
+        if(Objects.isNull(boss) && Objects.nonNull(this.boss))
         {
-            if(Objects.nonNull(this.boss))
-            {
-                this.boss.setBossBy(null);
-                //this.boss.setDepartment(null);
-                this.boss.setPosition("");
-            }
-            this.boss = null;
+            this.boss.setBossBy(null);
+            this.boss.setPosition("");
         }
+        //Устанавливаем нового босса - если он отличен (не равен) от текузего босса
         else if(!Objects.equals(boss, this.boss))
         {
             //Если новый босс является боссом другого отдела - то следует отвязать босса от прошлого отдела
@@ -131,12 +128,6 @@ public class Department
             this.boss = boss;
             this.boss.setBossBy(this);
             this.boss.setPosition(DepartmentService.BOSS_POSITION);
-
-
-            if(!Objects.equals(this.boss.getDepartment(),this))
-            {
-                this.boss.setDepartment(this);
-            }
         }
     }
 }

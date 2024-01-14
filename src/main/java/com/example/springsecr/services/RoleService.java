@@ -20,7 +20,6 @@ public class RoleService
     private static Role MODERATOR_ROLE;
     private static Role ADMIN_ROLE;
 
-    //@PostConstruct
     public void init()
     {
         //Получаем синглтон-отображения каждой роли (закешировать каждую роль), если данной роли нет в БД - создаем ее

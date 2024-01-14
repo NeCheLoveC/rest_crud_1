@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +17,8 @@ import java.util.*;
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_user_username_unq", columnList = "username", unique = true),
-        @Index(name = "idx_user_email_unq", columnList = "email", unique = true)
+        @Index(name = "idx_user_email_unq", columnList = "email", unique = true),
+        @Index(name = "idx_user_department_id", columnList = "department_id", unique = false)
 })
 public class User implements Cloneable{
     private static final String generatorName = "users_sequence_gen";
@@ -50,7 +52,7 @@ public class User implements Cloneable{
     )
     private Collection<Role> roles = new ArrayList<>();
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
     @ManyToOne
@@ -65,10 +67,11 @@ public class User implements Cloneable{
     private Department bossBy;
 
     //Должнотсь
-    @Column(name = "position")
+    @Column(name = "position", nullable = false)
     private String position;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", nullable = false)
+    @ColumnDefault("false")
     private boolean isDeleted;
 
     protected User(){}
@@ -85,9 +88,10 @@ public class User implements Cloneable{
         this.role = role;
     }
 
-    public User(String username, String password, String email, Role role) {
+    public User(String username, String password, String email, Role role, Department department) {
         this(username,password,role);
         this.email = email;
+        this.department = department;
     }
 
     public Long getId() {
@@ -131,9 +135,14 @@ public class User implements Cloneable{
     }
 
     public void setDepartment(Department department) {
-        this.department = department;
-        if(department != null)
-            department.getEmployers().add(this);
+        if(!Objects.equals(department, this.department))
+        {
+            if(Objects.nonNull(bossBy))
+            {
+                bossBy.setBoss(null);
+            }
+            this.department = department;
+        }
     }
 
     @Override
@@ -179,5 +188,7 @@ public class User implements Cloneable{
 
     void setBossBy(Department bossBy) {
         this.bossBy = bossBy;
+        if(Objects.nonNull(bossBy))
+            this.department = bossBy;
     }
 }
