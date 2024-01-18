@@ -29,7 +29,7 @@ public class UserRegisterRequestConverter implements Function<UserRegisterCreden
         Role usersAuthorities = RoleService.getUSER_ROLE();
         Optional<Department> department = departmentService.find(object.getDepartmentId());
         department.orElseThrow(() -> new BadRequestException(String.format("Департамент с id = %d не найден", object.getDepartmentId())));
-        User user = new User(object.getUsername(),bCryptEncoderWrapper.getbCryptEncoderWrapper().encode(object.getPassword()), object.getEmail(), usersAuthorities, department.get());
+        User user = new User(object.getUsername(),bCryptEncoderWrapper.getbCryptEncoderWrapper().encode(object.getPassword()), object.getEmail(), usersAuthorities, department.get(), object.getPosition());
         return user;
     }
 

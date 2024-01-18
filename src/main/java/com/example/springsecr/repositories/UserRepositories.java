@@ -28,6 +28,7 @@ public interface UserRepositories extends JpaRepository<User, Long>
     @Transactional
     public long count();
     @Transactional
+    @Query("select u from User u where lower(u.email) = lower(:email)")
     public Optional<User> getUserByEmail(String email);
 
     @Lock(LockModeType.PESSIMISTIC_READ)

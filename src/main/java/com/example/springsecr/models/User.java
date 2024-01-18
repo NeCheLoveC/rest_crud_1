@@ -27,7 +27,7 @@ public class User implements Cloneable{
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = generatorName)
     @SequenceGenerator(name = generatorName, sequenceName = generatorName)
     private Long id;
-    @NotNull
+    @NotNull(message = "Имя не может быть равно null")
     @Size(min = 5)
     @Column(name = "username", unique = true, nullable = false)
     private String username;
@@ -54,6 +54,7 @@ public class User implements Cloneable{
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
+    @NotNull
     private Role role;
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -68,6 +69,7 @@ public class User implements Cloneable{
 
     //Должнотсь
     @Column(name = "position", nullable = false)
+    @NotNull
     private String position;
 
     @Column(name = "is_deleted", nullable = false)
@@ -92,6 +94,14 @@ public class User implements Cloneable{
         this(username,password,role);
         this.email = email;
         this.department = department;
+        this.position = "";
+    }
+
+    public User(String username, String password, String email, Role role, Department department, String position) {
+        this(username,password,role);
+        this.email = email;
+        this.department = department;
+        this.position = position;
     }
 
     public Long getId() {

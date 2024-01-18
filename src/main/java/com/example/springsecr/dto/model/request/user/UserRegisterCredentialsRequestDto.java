@@ -19,4 +19,6 @@ public class UserRegisterCredentialsRequestDto
     private String email;
     @NotNull(message = "Департамент не не должен быть null")
     private Long departmentId;
+    @NotBlank
+    private String position;
 }

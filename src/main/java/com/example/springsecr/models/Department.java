@@ -66,6 +66,12 @@ public class Department
 
     public Department() {}
 
+    public Department(String name, Department departmentParent)
+    {
+        this.name = name;
+        this.departmentParent = departmentParent;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
