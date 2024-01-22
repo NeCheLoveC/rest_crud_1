@@ -143,12 +143,17 @@ public class User implements Cloneable{
     public void setDepartment(Department department) {
         if(!Objects.equals(department, this.department))
         {
-            if(Objects.nonNull(bossBy))
+            if(isBoss())
             {
                 bossBy.setBoss(null);
             }
             this.department = department;
         }
+    }
+
+    public boolean isBoss()
+    {
+        return Objects.nonNull(bossBy);
     }
 
     @Override
