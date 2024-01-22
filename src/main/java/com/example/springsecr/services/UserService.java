@@ -36,10 +36,7 @@ import java.util.stream.Collectors;
 public class UserService implements UserDetailsService
 {
     private DepartmentRepositories departmentRepositories;
-    private RoleService roleService;
     private UserRepositories userRepo;
-    private RoleRepositories roleRepo;
-    private BCryptEncoderWrapper bCryptPasswordWrapper;
     private UserRegisterRequestConverter userRegisterConverter;
     private UserRegistrationDtoValidator userRegistrationDtoValidator;
     private UserUpdateDtoValidator userUpdateDtoValidator;
@@ -51,17 +48,6 @@ public class UserService implements UserDetailsService
     {
         return userRepo.getUserByUsername(username);
     }
-
-    public User createDefaultUser(String username,String password)
-    {
-        return null;
-    }
-
-    public User createAdmin(String username,String password)
-    {
-        return null;
-    }
-
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

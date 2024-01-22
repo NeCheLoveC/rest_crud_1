@@ -11,6 +11,7 @@ import com.example.springsecr.utils.BCryptEncoderWrapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.event.annotation.BeforeTestClass;
@@ -23,19 +24,34 @@ public class InitSql
     private EntityManager entityManager;
     @Autowired
     private BCryptEncoderWrapper bCryptEncoderWrapper;
+
     @Transactional
     public void init()
     {
-        Query query = entityManager.createNativeQuery("insert into role(id,name) values (nextval('role_seq'), :userRole) , (nextval('role_seq'), :adminRole)");
-        query.setParameter("userRole", RoleType.USER.getRoleName());
-        query.setParameter("adminRole", RoleType.ADMIN.getRoleName());
-        query.executeUpdate();
-        createRootDepartment();
-        Long idRootDepartment = (Long) entityManager.createNativeQuery("select d.id from department d where d.department_parent_id is null").getSingleResult();
-        createFirstUserAdmin(idRootDepartment,bCryptEncoderWrapper);
-        Long adminId = (Long) entityManager.createNativeQuery("select u.id from users u where u.username = 'admin'").getSingleResult();
-        setBossAtRootDepartment(idRootDepartment, adminId);
+        Query query;
+        query = entityManager.createNativeQuery("select count(*) from department");
+        if((((Long) query.getSingleResult()) == 0))
+        {
+            query = entityManager.createNativeQuery("insert into role(id,name) values (nextval('role_seq'), :userRole) , (nextval('role_seq'), :adminRole)");
+            query.setParameter("userRole", RoleType.USER.getRoleName());
+            query.setParameter("adminRole", RoleType.ADMIN.getRoleName());
+            query.executeUpdate();
+            createRootDepartment();
+            Long idRootDepartment = (Long) entityManager.createNativeQuery("select d.id from department d where d.department_parent_id is null").getSingleResult();
+            createFirstUserAdmin(idRootDepartment,bCryptEncoderWrapper);
+            Long adminId = (Long) entityManager.createNativeQuery("select u.id from users u where u.username = 'admin'").getSingleResult();
+            setBossAtRootDepartment(idRootDepartment, adminId);
+        }
+    }
 
+    @Transactional
+    public void rollback()
+    {
+        entityManager.createNativeQuery("delete from department_moderator").executeUpdate();
+        entityManager.createNativeQuery("delete from department_boss").executeUpdate();
+        entityManager.createNativeQuery("delete from users").executeUpdate();
+        entityManager.createNativeQuery("delete from department").executeUpdate();
+        entityManager.createNativeQuery("delete from role").executeUpdate();
     }
 
     private void createRootDepartment()

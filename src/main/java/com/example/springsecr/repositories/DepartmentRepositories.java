@@ -26,10 +26,6 @@ public interface DepartmentRepositories extends JpaRepository<Department, Long>
     public Optional<Department> findByIdWithPessimisticWRITE(long id);
 
     @Transactional
-    @Query("select d from Department d where d.moderator = :admin")
-    public Optional<Department> findDepartmentByAdminId(User admin);
-
-    @Transactional
     @Query("select count(*) from Department")
     public long getCountEntities();
 
