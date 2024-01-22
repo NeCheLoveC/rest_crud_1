@@ -2,15 +2,11 @@ package com.example.springsecr.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.EqualsAndHashCode;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.security.core.userdetails.UserDetails;
+
 
 import java.util.*;
 
@@ -198,7 +194,9 @@ public class User implements Cloneable{
 
     void setBossBy(Department bossBy) {
         this.bossBy = bossBy;
+        /*
         if(Objects.nonNull(bossBy))
             this.department = bossBy;
+         */
     }
 }
