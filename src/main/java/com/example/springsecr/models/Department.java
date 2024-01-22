@@ -112,6 +112,30 @@ public class Department
     }
 
     public void setBoss(User boss) {
+        User currentBoss = this.boss;
+
+        if(Objects.equals(boss, this.boss))
+            return;
+
+        if(currentBoss != null)
+        {
+            currentBoss.setBossBy(null);
+            currentBoss.setPosition("");
+        }
+
+        if(boss.getBossBy() != null)
+        {
+            boss.getBossBy().boss = null;
+        }
+
+        if(boss != null)
+        {
+            boss.setBossBy(this);
+            boss.setPosition(DepartmentService.BOSS_POSITION);
+        }
+
+        this.boss = boss;
+        /*
         //Если мы хотим убрать текущего босса И Если есть босс - отвязать его от Департамента
         if(Objects.isNull(boss) && Objects.nonNull(this.boss))
         {
@@ -125,6 +149,7 @@ public class Department
             if(Objects.nonNull(boss.getBossBy()))
             {
                 boss.getBossBy().setBoss(null);
+                boss.getBossBy().setBoss(null);
             }
 
             //Отвязать текущего басса
@@ -135,5 +160,6 @@ public class Department
             this.boss.setBossBy(this);
             this.boss.setPosition(DepartmentService.BOSS_POSITION);
         }
+         */
     }
 }
