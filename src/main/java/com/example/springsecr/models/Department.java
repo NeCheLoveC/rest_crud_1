@@ -87,7 +87,31 @@ public class Department
     }
 
 
-    public void setModerator(User moderator) {
+    public void setModerator(User newModerator) {
+        User currentModerator = this.moderator;
+
+        if(Objects.equals(newModerator, currentModerator))
+            return;
+
+        if(currentModerator != null)
+        {
+            currentModerator.setModeratorBy(null);
+            this.moderator = null;
+        }
+
+        if(newModerator != null)
+        {
+            if(newModerator.getModeratorBy() != null)
+            {
+                newModerator.getModeratorBy().moderator = null;
+                //newModerator.setModeratorBy(null);
+            }
+            newModerator.setModeratorBy(this);
+        }
+
+        this.moderator = newModerator;
+
+        /*
         if (Objects.isNull(moderator) && Objects.nonNull(this.moderator))
         {
             this.moderator.setModeratorBy(null);
@@ -107,6 +131,8 @@ public class Department
             this.moderator = moderator;
             this.moderator.setModeratorBy(this);
         }
+
+         */
 
         //moderator.setModeratorBy(this);
     }
@@ -129,8 +155,6 @@ public class Department
             {
                 boss.getBossBy().boss = null;
             }
-
-
             boss.setBossBy(this);
             boss.setPosition(DepartmentService.BOSS_POSITION);
             boss.setDepartment(this);
