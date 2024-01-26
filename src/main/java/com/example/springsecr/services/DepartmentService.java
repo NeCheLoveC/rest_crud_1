@@ -116,12 +116,10 @@ public class DepartmentService
             throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
         if(!Objects.equals(admin.getModeratorBy(), department))
         {
-            //todo Можно убрать IF, но будет ли ошибка?
-            if(Objects.nonNull(admin.getModeratorBy()))
-                admin.getModeratorBy().setModerator(null);
-            //admin.getModeratorBy().setModerator(null);
-            departmentRepositories.flush();
-            department.setModerator(wrapperAdmin.get());
+            if(!departmentRepositories.departmentIsSubDepartmentOf(admin.getDepartment().getId(),departmentId))
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Нельзя установить модератора (%s) на департамент (%s)\n " +
+                        "Модератор должен быть закреплен за данным департаментом или за депертаментом выше по иерархии.", admin.getUsername(),department.getName()));
+            department.setModerator(admin);
         }
     }
 
