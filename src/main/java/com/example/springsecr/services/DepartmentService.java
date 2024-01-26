@@ -139,15 +139,10 @@ public class DepartmentService
             throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
         if(!Objects.equals(boss.getBossBy(), department))
         {
-            if(Objects.nonNull(boss.getBossBy()))
-            {
-                boss.getBossBy().setBoss(null);
-            }
-            departmentRepositories.flush();
             department.setBoss(boss);
-            boss.setPosition(BOSS_POSITION);
+            if(Objects.isNull(department.getModerator()))
+                setDepartmentModerator(bossId, departmentId);
         }
-        setDepartmentModerator(bossId, departmentId);
     }
     @Transactional
     public long count()

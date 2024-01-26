@@ -300,8 +300,92 @@ class DepartmentServiceTest {
         }
     }
 
+
+
+
     @Test
-    void tryToSetModerator() {
+    void tryToSetBossWhenDepartmentDoesNotExist()
+    {
+        //GIVING
+        final Long BOSS_ID = 1L;
+        final Long DEPARTMENT_ID = 2L;
+
+        doReturn(Optional.of(Mockito.<User>mock())).when(userRepositories).findByIdPessimisticLockRead(BOSS_ID);
+        doReturn(Optional.empty()).when(departmentRepositories).findByIdWithPessimisticREAD(DEPARTMENT_ID);
+
+        //WHEN
+        HttpCustomException exception = catchThrowableOfType(() -> departmentServiceUnderTest.setDepartmentBoss(BOSS_ID,DEPARTMENT_ID), HttpCustomException.class);
+
+
+        //THEN
+        verify(userRepositories, only()).findByIdPessimisticLockRead(BOSS_ID);
+        verify(departmentRepositories, only()).findByIdWithPessimisticREAD(DEPARTMENT_ID);
+        assertThat(exception).hasMessage(String.format("Департамент с id = %d не найден.",DEPARTMENT_ID));
+        assertThat(exception).isExactlyInstanceOf(HttpCustomException.class);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void tryToSetBossWhenBossHasAdminRole() {
+        //GIVING
+        final Long BOSS_ID = 1L;
+        final Long DEPARTMENT_ID = 2L;
+        try (MockedStatic<RoleService> utilities = Mockito.mockStatic(RoleService.class)) {
+            Department department = mock();
+            User moderator = mock();
+            Role adminRole = mock();
+
+            doReturn(Optional.of(department)).when(departmentRepositories).findByIdWithPessimisticREAD(DEPARTMENT_ID);
+            doReturn(Optional.of(moderator)).when(userRepositories).findByIdPessimisticLockRead(BOSS_ID);
+
+            doReturn(adminRole).when(moderator).getRole();
+
+            utilities.when(() -> RoleService.getADMIN_ROLE()).thenReturn(adminRole);
+
+            //WHEN
+            HttpCustomException err = catchThrowableOfType(() -> departmentServiceUnderTest.setDepartmentBoss(BOSS_ID, DEPARTMENT_ID), HttpCustomException.class);
+
+            //THEN
+            assertThat(err)
+                    .isExactlyInstanceOf(HttpCustomException.class)
+                    .hasMessage("Нельзя менять департамент у Администратора");
+            assertThat(err.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Test
+    void tryToSetBossWhenDepartmentIsRootDepartment() {
+        //GIVING
+        final Long MODERATOR_ID = 1L;
+        final Long DEPARTMENT_ID = 2L;
+        try (MockedStatic<RoleService> utilities = Mockito.mockStatic(RoleService.class)){
+            Department department = mock();
+            User moderator = mock();
+            Role adminRole = mock();
+
+            doReturn(Optional.of(department)).when(departmentRepositories).findByIdWithPessimisticREAD(DEPARTMENT_ID);
+            doReturn(Optional.of(moderator)).when(userRepositories).findByIdPessimisticLockRead(MODERATOR_ID);
+
+            doReturn(userRole).when(moderator).getRole();
+            doReturn(null).when(department).getDepartmentParent();
+
+            utilities.when(() ->RoleService.getADMIN_ROLE()).thenReturn(adminRole);
+
+            //WHEN
+            HttpCustomException err = catchThrowableOfType(() -> departmentServiceUnderTest.setDepartmentBoss(MODERATOR_ID, DEPARTMENT_ID),HttpCustomException.class) ;
+
+            //THEN
+            assertThat(err)
+                    .isExactlyInstanceOf(HttpCustomException.class)
+                    .hasMessage("Главный департамент - неизменяемая сущность");
+            assertThat(err.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @Test
+    void tryToSetModerator()
+    {
         //GIVING
         final Long MODERATOR_ID = 1L;
         final Long DEPARTMENT_ID = 2L;
@@ -333,7 +417,36 @@ class DepartmentServiceTest {
     }
 
     @Test
-    void setDepartmentBoss() {
+    void tryToSetDepartmentBoss()
+    {
+        //GIVING
+        final Long BOSS_ID = 1L;
+        final Long DEPARTMENT_ID = 2L;
+        try (MockedStatic<RoleService> utilities = Mockito.mockStatic(RoleService.class)){
+            Department department = mock();
+            User boss = mock();
+            Role adminRole = mock();
+
+            doReturn(Optional.of(department)).when(departmentRepositories).findByIdWithPessimisticREAD(DEPARTMENT_ID);
+            doReturn(Optional.of(boss)).when(userRepositories).findByIdPessimisticLockRead(BOSS_ID);
+
+            doReturn(userRole).when(boss).getRole();
+            doReturn(mock(Department.class)).when(department).getDepartmentParent();
+            //doReturn(department).when(boss).getDepartment();
+            doReturn(mock(User.class)).when(department).getModerator();
+
+            //doReturn(DEPARTMENT_ID).when(department).getId();
+            //doReturn("egor").when(moderator).getUsername();
+            //doReturn("BACKEND - департамент").when(department).getName();
+
+
+            utilities.when(() ->RoleService.getADMIN_ROLE()).thenReturn(adminRole);
+
+            //WHEN
+            departmentServiceUnderTest.setDepartmentBoss(BOSS_ID, DEPARTMENT_ID);
+            //THEN
+            verify(department, times(1)).setBoss(boss);
+        }
     }
 
     @Test
