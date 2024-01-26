@@ -40,10 +40,9 @@ public class Role {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Role role = (Role) o;
-        return getId() != null && Objects.equals(getId(), role.getId());
+        Role object = (Role) o;
+        return this.name.equals(object.getName());
     }
 
     @Override
