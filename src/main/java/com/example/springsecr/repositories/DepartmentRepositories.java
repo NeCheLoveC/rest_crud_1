@@ -41,4 +41,8 @@ public interface DepartmentRepositories extends JpaRepository<Department, Long>
     @Transactional
     @Query("select d from Department d where d.departmentParent is null")
     public Department findRootDepartment();
+
+    @Transactional
+    @Query("select isSubDepartment(:department, :childDepartment)")
+    public boolean departmentIsSubDepartmentOf(long department, long childDepartment);
 }
