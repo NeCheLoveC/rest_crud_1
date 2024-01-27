@@ -161,7 +161,7 @@ public class User implements Cloneable{
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         User user = (User) o;
-        return getId() != null && Objects.equals(getId(), user.getId());
+        return this.getUsername().equals(((User) o).username);
     }
 
     @Override
