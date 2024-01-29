@@ -1,0 +1,22 @@
+CREATE OR REPLACE FUNCTION isSubDepartment(super_department_id bigint, child_department_id bigint) RETURNS bool
+AS $$
+DECLARE
+    cur_sub_department_id bigint := child_department_id;
+BEGIN
+    IF child_department_id = super_department_id THEN
+        RETURN true;
+    END IF;
+
+    WHILE cur_sub_department_id IS NOT NULL LOOP
+        SELECT d.department_parent_id INTO cur_sub_department_id
+        FROM department d
+        WHERE d.id = cur_sub_department_id;
+
+        IF cur_sub_department_id = super_department_id THEN
+            RETURN true;
+        END IF;
+    END LOOP;
+
+    RETURN false;
+END;
+$$ LANGUAGE plpgsql;
