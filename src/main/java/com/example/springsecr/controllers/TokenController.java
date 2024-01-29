@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/jwt")
 @AllArgsConstructor
@@ -34,7 +36,8 @@ public class TokenController
         if(authorizationIsSuccess(user, usernamePasswordDTO))
         {
             String jwt = jwtUtils.generateJwt(user);
-            return ResponseEntity.ok(jwt);
+            HashMap.SimpleImmutableEntry token = new HashMap.SimpleImmutableEntry<String,String>("token", jwt);
+            return ResponseEntity.ok(token);
         }
         else
         {
