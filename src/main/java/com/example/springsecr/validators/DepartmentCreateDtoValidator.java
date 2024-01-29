@@ -6,6 +6,7 @@ import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.repositories.UserRepositories;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
@@ -23,12 +24,14 @@ public class DepartmentCreateDtoValidator implements Validator
     {
         return clazz.equals(DepartmentCreateRequestDTO.class);
     }
-
     @Transactional()
     @Override
     public void validate(Object target, Errors errors)
     {
         DepartmentCreateRequestDTO departmentDto = (DepartmentCreateRequestDTO) target;
+
+        if(departmentRepositories.existByDepartmentByName(departmentDto.getName()))
+            errors.rejectValue("name", "", "Имя департамента уже занято");
         if(departmentDto.getDepartmentParentId() != null)
         {
             Optional<Department> parentDepartment = departmentRepositories.findById(departmentDto.getDepartmentParentId());
