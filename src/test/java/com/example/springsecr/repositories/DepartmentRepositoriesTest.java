@@ -68,4 +68,44 @@ class DepartmentRepositoriesTest
                 .isNotNull()
                 .matches(d -> d.getDepartmentParent() == null);
     }
+
+    @Disabled
+    @Test
+    void departmentIsSubDepartmentOf()
+    {
+        String query = "CREATE OR REPLACE FUNCTION isSubDepartment(super_department_id bigint, child_department_id bigint) RETURNS bool\n" +
+                "AS $$\n" +
+                "DECLARE\n" +
+                "    cur_sub_department_id bigint := child_department_id;\n" +
+                "BEGIN\n" +
+                "    IF child_department_id = super_department_id THEN\n" +
+                "        RETURN true;\n" +
+                "    END IF;\n" +
+                "\n" +
+                "    WHILE cur_sub_department_id IS NOT NULL LOOP\n" +
+                "        SELECT d.department_parent_id INTO cur_sub_department_id \n" +
+                "        FROM department d \n" +
+                "        WHERE d.id = cur_sub_department_id;\n" +
+                "\n" +
+                "        IF cur_sub_department_id = super_department_id THEN\n" +
+                "            RETURN true;\n" +
+                "        END IF;\n" +
+                "    END LOOP;\n" +
+                "\n" +
+                "    RETURN false;\n" +
+                "END;\n" +
+                "$$ LANGUAGE plpgsql;";
+        entityManager.createNativeQuery(query).executeUpdate();
+        //GIVEN
+        Department mainDepartment = new Department("BACKEND - гланый департамент", departmentRepositoriesUnderTest.findRootDepartment());
+        departmentRepositoriesUnderTest.save(mainDepartment);
+        Department subDepartment = new Department("Отдел #1 - BACKEND", mainDepartment);
+        departmentRepositoriesUnderTest.save(subDepartment);
+
+        //WHEN
+        boolean result = departmentRepositoriesUnderTest.departmentIsSubDepartmentOf(mainDepartment.getId(), subDepartment.getId());
+
+        //THEN
+        assertThat(result).isTrue();
+    }
 }

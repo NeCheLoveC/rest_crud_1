@@ -435,11 +435,6 @@ class DepartmentServiceTest {
             //doReturn(department).when(boss).getDepartment();
             doReturn(mock(User.class)).when(department).getModerator();
 
-            //doReturn(DEPARTMENT_ID).when(department).getId();
-            //doReturn("egor").when(moderator).getUsername();
-            //doReturn("BACKEND - департамент").when(department).getName();
-
-
             utilities.when(() ->RoleService.getADMIN_ROLE()).thenReturn(adminRole);
 
             //WHEN
@@ -447,21 +442,5 @@ class DepartmentServiceTest {
             //THEN
             verify(department, times(1)).setBoss(boss);
         }
-    }
-
-    @Test
-    void count() {
-    }
-
-    @Test
-    void inactive() {
-    }
-
-    @Test
-    void find() {
-    }
-
-    @Test
-    void getRootDepartment() {
     }
 }

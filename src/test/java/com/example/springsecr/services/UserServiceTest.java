@@ -46,15 +46,13 @@ class UserServiceTest {
     private EntityManager entityManager;
 
     @BeforeEach
-    private void init()
-    {
-        userServiceUnderTest = new UserService(departmentRepositories, userRepositories,userRegisterConverter,userRegistrationDtoValidator,userUpdateDtoValidator, entityManager);
+    private void init() {
+        userServiceUnderTest = new UserService(departmentRepositories, userRepositories, userRegisterConverter, userRegistrationDtoValidator, userUpdateDtoValidator, entityManager);
     }
 
 
     @Test
-    void loadUserByUsername()
-    {
+    void loadUserByUsername() {
         final String USERNAME = "admin";
         final String PASSWORD = "123456";
         User admin = mock();
@@ -67,12 +65,11 @@ class UserServiceTest {
 
         userServiceUnderTest.loadUserByUsername(USERNAME);
 
-        verify(userRepositories,times(1)).getUserByUsername(USERNAME);
+        verify(userRepositories, times(1)).getUserByUsername(USERNAME);
     }
 
     @Test
-    void canSaveUser()
-    {
+    void canSaveUser() {
         //GIVEN
         UserRegisterCredentialsRequestDto userDto = UserRegisterCredentialsRequestDto.builder()
                 .username("anton")
@@ -86,13 +83,12 @@ class UserServiceTest {
         User user = userServiceUnderTest.saveUser(userDto);
 
         //THEN
-        verify(userRegistrationDtoValidator, times(1)).validate(any(),any());
+        verify(userRegistrationDtoValidator, times(1)).validate(any(), any());
         verify(userRepositories, times(1)).save(any());
     }
 
     @Test
-    void trySaveUser_WhenExistUserWithSameEmail()
-    {
+    void trySaveUser_WhenExistUserWithSameEmail() {
         //GIVEN
         UserRegisterCredentialsRequestDto userDto = UserRegisterCredentialsRequestDto.builder()
                 .username("anton")
@@ -106,44 +102,16 @@ class UserServiceTest {
 
         Mockito.doAnswer(invocationOnMock -> {
             Errors errors = invocationOnMock.getArgument(1);
-            errors.rejectValue("email","", "Email занят");
+            errors.rejectValue("email", "", "Email занят");
             return null;
-        }).when(userRegistrationDtoValidator).validate(any(),any());
+        }).when(userRegistrationDtoValidator).validate(any(), any());
 
         //WHEN
         HttpCustomException error = Assertions.catchThrowableOfType(() -> userServiceUnderTest.saveUser(userDto), HttpCustomException.class);
 
 
         //THEN
-        verify(userRegistrationDtoValidator, times(1)).validate(any(),any());
+        verify(userRegistrationDtoValidator, times(1)).validate(any(), any());
         assertThat(error.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void update() {
-    }
-
-    @Test
-    void setDepartment() {
-    }
-
-    @Test
-    void findUsersByPredicate() {
-    }
-
-    @Test
-    void findById() {
-    }
-
-    @Test
-    void getUserByEmail() {
-    }
-
-    @Test
-    void getCountUser() {
-    }
-
-    @Test
-    void getAdmin() {
     }
 }

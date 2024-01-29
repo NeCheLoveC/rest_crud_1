@@ -17,14 +17,6 @@ class DepartmentTest {
     private Role role;
     @Mock
     private Department rootDepartment;
-    @Test
-    void setDepartment() {
-    }
-
-    @Test
-    void setModeratorBy() {
-    }
-
 
     @Test
     void tryToSetBossToDepartmentWithoutBoss()
@@ -229,8 +221,5 @@ class DepartmentTest {
         assertThat(moderatorOfFirstDepartment.getModeratorBy()).isEqualTo(secondDepartment);
         assertThat(secondDepartment.getModerator()).isEqualTo(moderatorOfFirstDepartment);
 
-        //verify(moderatorOfFirstDepartment, times(1)).setModeratorBy(null);
-        //verify(moderatorOfSecondDepartment.getModeratorBy(), times(1)).setModerator(null);
-        //verify(moderatorOfSecondDepartment, times(1)).setModeratorBy(department);
     }
 }
