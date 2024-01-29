@@ -49,18 +49,18 @@ public class User implements Cloneable{
     private Collection<Role> roles = new ArrayList<>();
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", nullable = false)
     @NotNull
     private Role role;
     @ManyToOne
-    @JoinColumn(name = "department_id")
+    @JoinColumn(name = "department_id", nullable = false)
     @NotNull
     //@OnDelete(action = OnDeleteAction.SET_NULL)
     private Department department;
 
-    @OneToOne(mappedBy = "moderator")
+    @OneToOne(mappedBy = "moderator", optional = true)
     private Department moderatorBy;
-    @OneToOne(mappedBy = "boss")
+    @OneToOne(mappedBy = "boss", optional = true)
     private Department bossBy;
 
     //Должнотсь
