@@ -41,6 +41,8 @@ public class DepartmentController
 {
     private final DepartmentToDepartmentResponseDtoConverter departmentToDepartmentDtoConverter;
     private final DepartmentService departmentService;
+    @Value("${host}")
+    private String HOST;
     @Operation(summary = "Получение списка департаментов")
     @ApiResponses(value =
         @ApiResponse(responseCode = "200", description = "Список департаментов", content = @Content(mediaType = "application/json"))
@@ -70,8 +72,11 @@ public class DepartmentController
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id , @RequestBody DepartmentUpdateRequestDto departmentUpdateDto)
+    public ResponseEntity<?> update(@PathVariable("id") Long id ,@Valid @RequestBody DepartmentUpdateRequestDto departmentUpdateDto, BindingResult errors)
     {
+        if(errors.hasErrors())
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST,errors);
+
         departmentUpdateDto.setId(id);
         departmentService.update(departmentUpdateDto);
         return ResponseEntity.ok().build();
