@@ -9,6 +9,7 @@ import com.example.springsecr.models.User;
 import com.example.springsecr.repositories.DepartmentRepositories;
 import com.example.springsecr.repositories.UserRepositories;
 import com.example.springsecr.validators.DepartmentCreateDtoValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class DepartmentService
         }
         Department department = new Department();
         department.setName(departmentDto.getName());
+        departmentRepositories.save(department);
         if(departmentDto.getDepartmentParentId() != null)
         {
             Optional<Department> parentDepartment = departmentRepositories.findById(departmentDto.getDepartmentParentId());
@@ -67,7 +69,7 @@ public class DepartmentService
             department.setModerator(moderatorWrapper.get());
             //moderatorWrapper.get().setDepartment(department);
         }
-        return departmentRepositories.save(department);
+        return department;
     }
 
     public Collection<Department> getAllActiveDepartments()
@@ -78,7 +80,7 @@ public class DepartmentService
     public Department update(DepartmentUpdateRequestDto departmentUpdateDto)
     {
         Optional<Department> department = departmentRepositories.findByIdWithPessimisticWRITE(departmentUpdateDto.getId());
-        department.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND));
+        department.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, "Департамент не найден"));
         if(department.get().isDeleted())
             throw new HttpCustomException(HttpStatus.NOT_FOUND);
         department.get().setName(departmentUpdateDto.getName().trim());
