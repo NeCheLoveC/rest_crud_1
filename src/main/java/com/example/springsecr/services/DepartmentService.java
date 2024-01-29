@@ -101,47 +101,84 @@ public class DepartmentService
     @Transactional
     public void setDepartmentModerator(Long moderatorId, Long departmentId)
     {
-        Optional<User> wrapperAdmin = userRepositories.findById(moderatorId);
-        wrapperAdmin.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Пользователь с id = %d не найден.", moderatorId)));
-        Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticWRITE(departmentId);
-        wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
-
-        User admin = wrapperAdmin.get();
-        Department department = wrapperDepartment.get();
-
-        if(admin.getRole().equals(RoleService.getADMIN_ROLE()))
-            throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Нельзя менять департамент у Администратора");
-
-        if(department.getDepartmentParent() == null)
-            throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
-        if(!Objects.equals(admin.getModeratorBy(), department))
+        if(moderatorId != null)
         {
-            if(!departmentRepositories.departmentIsSubDepartmentOf(admin.getDepartment().getId(),departmentId))
-                throw new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Нельзя установить модератора (%s) на департамент (%s)\n " +
-                        "Модератор должен быть закреплен за данным департаментом или за депертаментом выше по иерархии.", admin.getUsername(),department.getName()));
-            department.setModerator(admin);
+            Optional<User> wrapperAdmin = userRepositories.findById(moderatorId);
+            wrapperAdmin.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Пользователь с id = %d не найден.", moderatorId)));
+            Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticWRITE(departmentId);
+            wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
+
+            User admin = wrapperAdmin.get();
+            Department department = wrapperDepartment.get();
+
+            if(admin.getRole().equals(RoleService.getADMIN_ROLE()))
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Нельзя менять департамент у Администратора");
+
+            if(department.getDepartmentParent() == null)
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
+            if(!Objects.equals(admin.getModeratorBy(), department))
+            {
+                if(!departmentRepositories.departmentIsSubDepartmentOf(admin.getDepartment().getId(),departmentId))
+                    throw new HttpCustomException(HttpStatus.BAD_REQUEST, String.format("Нельзя установить модератора (%s) на департамент (%s)\n " +
+                            "Модератор должен быть закреплен за данным департаментом или за депертаментом выше по иерархии.", admin.getUsername(),department.getName()));
+                department.setModerator(admin);
+            }
         }
+        else
+        {
+            Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticWRITE(departmentId);
+            wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
+            Department department = wrapperDepartment.get();
+
+
+            if(department.getDepartmentParent() == null)
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
+
+            department.setModerator(null);
+
+        }
+
     }
+
+
 
     @Transactional
     public void setDepartmentBoss(Long bossId, Long departmentId)
     {
-        Optional<User> wrapperBoss = userRepositories.findByIdPessimisticLockRead(bossId);
-        wrapperBoss.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Пользователь с id = %d не найден.", bossId)));
-        Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticREAD(departmentId);
-        wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
-
-        Department department = wrapperDepartment.get();
-        User boss = wrapperBoss.get();
-        if(boss.getRole().equals(RoleService.getADMIN_ROLE()))
-            throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Нельзя менять департамент у Администратора");
-        if(department.getDepartmentParent() == null)
-            throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
-        if(!Objects.equals(boss.getBossBy(), department))
+        if(bossId != null)
         {
-            department.setBoss(boss);
-            if(Objects.isNull(department.getModerator()))
-                setDepartmentModerator(bossId, departmentId);
+            Optional<User> wrapperBoss = userRepositories.findByIdPessimisticLockRead(bossId);
+            wrapperBoss.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Пользователь с id = %d не найден.", bossId)));
+            Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticREAD(departmentId);
+            wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
+
+            Department department = wrapperDepartment.get();
+            User boss = wrapperBoss.get();
+            if(boss.getRole().equals(RoleService.getADMIN_ROLE()))
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Нельзя менять департамент у Администратора");
+            if(department.getDepartmentParent() == null)
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
+
+            if(!Objects.equals(boss.getBossBy(), department))
+            {
+                department.setBoss(boss);
+                if(Objects.isNull(department.getModerator()))
+                    setDepartmentModerator(bossId, departmentId);
+            }
+        }
+        else
+        {
+            Optional<Department> wrapperDepartment = departmentRepositories.findByIdWithPessimisticREAD(departmentId);
+            wrapperDepartment.orElseThrow(() -> new HttpCustomException(HttpStatus.NOT_FOUND, String.format("Департамент с id = %d не найден.", departmentId)));
+
+            Department department = wrapperDepartment.get();
+
+
+            if(department.getDepartmentParent() == null)
+                throw new HttpCustomException(HttpStatus.BAD_REQUEST, "Главный департамент - неизменяемая сущность");
+
+            department.setBoss(null);
+
         }
     }
     @Transactional
