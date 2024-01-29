@@ -28,12 +28,23 @@ public class DepartmentController
 {
     private final DepartmentToDepartmentResponseDtoConverter departmentToDepartmentDtoConverter;
     private final DepartmentService departmentService;
+    @Operation(summary = "Получение списка департаментов")
+    @ApiResponses(value =
+        @ApiResponse(responseCode = "200", description = "Список департаментов", content = @Content(mediaType = "application/json"))
+    )
     @GetMapping
     public ResponseEntity<List<DepartmentResponseDto>> findAll()
     {
         List<DepartmentResponseDto> list = departmentService.getAllActiveDepartments().stream().map(departmentToDepartmentDtoConverter).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
+    @Operation(summary = "Создание нового департамента")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "201", description = "Департамент создан"),
+                    @ApiResponse(responseCode = "400", description = "Недопустимые данные")
+            }
+    )
     @PostMapping()
     public ResponseEntity<?> create(@RequestBody @Validated DepartmentCreateRequestDTO departmentDto, BindingResult bindingResult)
     {
