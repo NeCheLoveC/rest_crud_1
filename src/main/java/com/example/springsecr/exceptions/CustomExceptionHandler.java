@@ -8,30 +8,32 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+
 @RestControllerAdvice
 public class CustomExceptionHandler
 {
     @ExceptionHandler({BadRequestException.class, ConstraintViolationException.class})
-    public ResponseEntity<String> constraintViolation(RuntimeException err)
+    public ResponseEntity<?> constraintViolation(RuntimeException err)
     {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap.SimpleImmutableEntry<String,String>("error_message",err.getMessage()));
     }
 
     @ExceptionHandler({UsernameNotFoundException.class})
-    public ResponseEntity<String> notFoundUser(RuntimeException err)
+    public ResponseEntity<?> notFoundUser(RuntimeException err)
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(err.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new HashMap.SimpleImmutableEntry<String,String>("error_message",err.getMessage()));
     }
 
     @ExceptionHandler({EntityNotFoundException.class})
-    public ResponseEntity<String> notFoundEntity(RuntimeException er)
+    public ResponseEntity<?> notFoundEntity(RuntimeException er)
     {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap.SimpleImmutableEntry<String,String>("error_message",er.getMessage()));
     }
 
     @ExceptionHandler({HttpCustomException.class})
     public ResponseEntity<?> catchCustomException(HttpCustomException err)
     {
-        return ResponseEntity.status(err.getHttpStatus()).body(err.getMessage());
+        return ResponseEntity.status(err.getHttpStatus()).body(new HashMap.SimpleImmutableEntry<String,String>("error_message",err.getMessage()));
     }
 }

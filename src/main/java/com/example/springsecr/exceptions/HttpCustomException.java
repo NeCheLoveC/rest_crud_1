@@ -40,7 +40,4 @@ public class HttpCustomException extends RuntimeException
         });
         return errors.toString();
     }
-
-
-
 }
