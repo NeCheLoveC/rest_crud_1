@@ -45,4 +45,8 @@ public interface DepartmentRepositories extends JpaRepository<Department, Long>
     @Transactional
     @Query("select isSubDepartment(:department, :childDepartment)")
     public boolean departmentIsSubDepartmentOf(long department, long childDepartment);
+
+    @Transactional
+    @Query("select CASE WHEN count(d) > 0 THEN TRUE ELSE FALSE END from Department d")
+    public boolean existByDepartmentByName(String name);
 }
