@@ -11,7 +11,7 @@ public class UserUpdateRequestDTO
 {
     @JsonIgnore
     public long id;
-    @Email
+    @Email(message = "email должен иметь формат электронного адреса")
     @NotNull
     private String email;
     @NotNull

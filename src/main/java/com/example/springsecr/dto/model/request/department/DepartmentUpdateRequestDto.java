@@ -1,10 +1,7 @@
 package com.example.springsecr.dto.model.request.department;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +12,6 @@ public class DepartmentUpdateRequestDto
     @JsonIgnore
     private Long id;
     @NotBlank(message = "Имя пользователя не должно быть пустым")
-    @Pattern(regexp = ".{5,}")
+    @Size(min = 5)
     private String name;
 }
