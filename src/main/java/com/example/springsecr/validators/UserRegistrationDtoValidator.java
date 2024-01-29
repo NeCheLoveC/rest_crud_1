@@ -28,8 +28,8 @@ public class UserRegistrationDtoValidator implements Validator
     public void validate(Object target, Errors errors)
     {
         UserRegisterCredentialsRequestDto userCredentionalsDto = (UserRegisterCredentialsRequestDto) target;
-        validateUsername(userCredentionalsDto.getUsername(), errors);
-        validateEmail(userCredentionalsDto.getEmail(), errors);
+        validateUsername(userCredentionalsDto.getUsername().trim(), errors);
+        validateEmail(userCredentionalsDto.getEmail().trim(), errors);
     }
 
     private void validateUsername(String username, Errors errors)
