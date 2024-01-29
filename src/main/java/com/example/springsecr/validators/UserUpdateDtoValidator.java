@@ -21,7 +21,6 @@ import java.util.Optional;
 public class UserUpdateDtoValidator implements Validator
 {
     private UserRepositories userRepositories;
-    private DepartmentRepositories departmentRepositories;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -59,8 +58,4 @@ public class UserUpdateDtoValidator implements Validator
         this.userRepositories = userRepositories;
     }
 
-    @Autowired
-    public void setDepartmentRepositories(DepartmentRepositories departmentRepositories) {
-        this.departmentRepositories = departmentRepositories;
-    }
 }

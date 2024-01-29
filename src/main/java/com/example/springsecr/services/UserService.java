@@ -57,7 +57,7 @@ public class UserService implements UserDetailsService
         return userDetails;
     }
 
-    @Transactional()
+    @Transactional
     public User saveUser(UserRegisterCredentialsRequestDto newUser)
     {
         BindingResult bindingResult1 = new DirectFieldBindingResult(newUser, "newUser");
