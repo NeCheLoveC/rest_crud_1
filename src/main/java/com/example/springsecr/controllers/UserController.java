@@ -53,8 +53,10 @@ public class UserController
     }
 
     @PutMapping("/{idUser}/department")
-    public ResponseEntity<?> setUserDepartment(@PathVariable("idUser") Long idUser, @RequestBody UpdateUserDepartmentsDTO updateUserDepartmentsDTO)
+    public ResponseEntity<?> setUserDepartment(@PathVariable("idUser") Long idUser, @RequestBody @Valid UpdateUserDepartmentsDTO updateUserDepartmentsDTO, BindingResult bindingResult)
     {
+        if(bindingResult.hasErrors())
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST, bindingResult);
         userService.setDepartment(idUser, updateUserDepartmentsDTO.getDepartmentId());
         return ResponseEntity.ok().build();
     }
