@@ -46,9 +46,10 @@ public class UserController
             @PathVariable("id") long id
     )
     {
-        userUpdateDTO.setId(id);
         if(bindingResult.hasErrors())
-            return ResponseEntity.badRequest().body(bindingResult.getAllErrors().stream().map(er -> er.getDefaultMessage()).collect(Collectors.joining()));
+            throw new HttpCustomException(HttpStatus.BAD_REQUEST, bindingResult);
+        userUpdateDTO.setId(id);
+        userService.update(userUpdateDTO);
         return ResponseEntity.ok().build();
     }
 
