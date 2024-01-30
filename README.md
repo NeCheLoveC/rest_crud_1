@@ -29,8 +29,11 @@
 При инициализации создается "Администратор" системы и "Корневой Департамент".
 
 Подключен Swagger.
+
 БД: PostgreSQL
+
 Backend: Java Spring Framework.
+
 ORM: Hibernate.
 
 Тестирование осуществляется библиотеками JUnit5 + Mockito в составе Spring Test.
